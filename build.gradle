@@ -1,0 +1,74 @@
+buildscript {
+    ext.kotlin_version = '1.2.10'
+
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+plugins {
+    id 'maven'
+    id 'org.spongepowered.plugin' version '0.8.1'
+    id 'com.github.johnrengelman.shadow' version '1.2.4'
+    id 'org.jetbrains.kotlin.jvm' version '1.2.10'
+    id 'org.jetbrains.kotlin.kapt' version '1.2.10'
+    id 'net.minecrell.licenser' version '0.4'
+}
+
+group 'com.projectrosary'
+version version
+description description
+
+sponge {
+    plugin {
+        meta {
+            name = name
+            id = name.toLowerCase().replace(' ', '')
+            version = version
+            description = description
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+
+    maven {
+        url 'https://repo.spongepowered.org/maven/'
+    }
+
+    maven {
+        url 'https://jitpack.io/'
+    }
+}
+
+configurations {
+    compile.extendsFrom kapt
+    compile.extendsFrom shadow
+}
+
+dependencies {
+    shadow "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+    kapt 'org.spongepowered:spongeapi:7.0.0'
+    shadow 'com.github.pie-flavor:Kludge:86e95fe'
+}
+
+jar.enabled = false
+build.dependsOn shadowJar
+
+shadowJar {
+    configurations = [project.configurations.shadow]
+    classifier = null
+    relocate('kotlin', "${project.group}.${project.name.toLowerCase().replace(' ', '')}.runtime.kotlin")
+    relocate('flavor.pie.kludge', "${project.group}.${project.name.toLowerCase().replace(' ', '')}.util.kludge")
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}

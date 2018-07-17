@@ -25,31 +25,35 @@
 package com.projectrosary.titlezones
 
 import com.google.inject.Inject
+import flavor.pie.kludge.PluginManager
 import ninja.leaping.configurate.commented.CommentedConfigurationNode
 import ninja.leaping.configurate.loader.ConfigurationLoader
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.spongepowered.api.config.DefaultConfig
 import org.spongepowered.api.entity.living.player.Player
 import org.spongepowered.api.event.Listener
 import org.spongepowered.api.event.entity.MoveEntityEvent
 import org.spongepowered.api.event.filter.Getter
 import org.spongepowered.api.event.game.GameReloadEvent
+import org.spongepowered.api.event.game.state.GamePostInitializationEvent
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent
+import org.spongepowered.api.plugin.Dependency
 import org.spongepowered.api.plugin.Plugin
 import org.spongepowered.api.plugin.PluginContainer
 import org.spongepowered.api.text.title.Title
 import java.nio.file.Files
 import java.nio.file.Path
 
-@Plugin(id="titlezones",
-        name="Title Zones",
-        description="A Sponge plugin that allows you to define zones that send Titles to Players who cross their borders.",
-        version="1.0.0-SNAPSHOT",
-        authors=["widd"])
-class TitleZones @Inject constructor(private val plugin: PluginContainer,
-                                     private val logger: Logger,
-                                     @DefaultConfig(sharedRoot=false) private val path: Path,
-                                     @DefaultConfig(sharedRoot=false) private val loader: ConfigurationLoader<CommentedConfigurationNode>) {
+@Plugin(id = "titlezones",
+        name = "Title Zones",
+        description = "A Sponge plugin that allows you to define zones that send Titles to Players who cross their borders.",
+        version = "1.0.0-SNAPSHOT",
+        authors = ["widd"],
+        dependencies = [Dependency(id = "boxboy", optional = true)])
+class TitleZones @Inject constructor(plugin: PluginContainer,
+                                     @DefaultConfig(sharedRoot = false) private val path: Path,
+                                     @DefaultConfig(sharedRoot = false) private val loader: ConfigurationLoader<CommentedConfigurationNode>) {
     companion object {
         lateinit var instance: TitleZones
         val config get() = instance.config
@@ -57,6 +61,7 @@ class TitleZones @Inject constructor(private val plugin: PluginContainer,
     }
 
     private lateinit var config: Config
+    private var logger: Logger = LoggerFactory.getLogger(plugin.name)
 
     init {
         instance = this
@@ -65,7 +70,7 @@ class TitleZones @Inject constructor(private val plugin: PluginContainer,
     private fun loadConfig() {
         if (!Files.exists(path)) {
             logger.info("Config not found, creating defaults")
-            with (loader) {
+            with(loader) {
                 save(createEmptyNode().setValue(Config.type, Config()))
             }
         }
@@ -87,6 +92,11 @@ class TitleZones @Inject constructor(private val plugin: PluginContainer,
     @Listener
     fun reload(e: GameReloadEvent) {
         loadConfig()
+    }
+
+    @Listener
+    fun postInit(e: GamePostInitializationEvent) {
+        PluginManager.getPlugin("boxboy").ifPresent { BoxboySupport.hook() }
     }
 
     @Listener

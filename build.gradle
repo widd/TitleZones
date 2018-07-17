@@ -22,16 +22,7 @@ group 'com.projectrosary'
 version version
 description description
 
-sponge {
-    plugin {
-        meta {
-            name = name
-            id = name.toLowerCase().replace(' ', '')
-            version = version
-            description = description
-        }
-    }
-}
+sponge.plugin.id = "titlezones"
 
 repositories {
     mavenCentral()
@@ -55,6 +46,7 @@ dependencies {
     shadow "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
     kapt 'org.spongepowered:spongeapi:7.0.0'
     shadow 'com.github.pie-flavor:Kludge:86e95fe'
+    compile 'com.github.xemiru.sponge:boxboy:1.2'
 }
 
 jar.enabled = false
@@ -72,3 +64,15 @@ compileKotlin {
         jvmTarget = '1.8'
     }
 }
+
+compileKotlin.dependsOn generateMetadata
+
+kapt {
+    processors += 'org.spongepowered.plugin.processor.PluginProcessor'
+    arguments {
+        arg 'extraMetadataFiles', generateMetadata.target
+        arg 'metadataOutputFile', generateMetadata.target
+    }
+}
+
+afterEvaluate { tasks.kaptKotlin.outputs.upToDateWhen { false } }

@@ -64,15 +64,16 @@ class BoxboySupport {
                         z.subtitle,
                         !"X: ${z.position.x}".gray(),
                         !"Y: ${z.position.y}".gray(),
-                        !"Z: ${z.position.z}".gray()
+                        !"Z: ${z.position.z}".gray(),
+                        !"Click to teleport!".green().italic()
                 ))
                 itemType(ItemTypes.ENDER_PEARL)
             }, { ctx ->
                 with(ctx.clicker) {
-                    if (!ctx.clicker.closeInventory())
-                        TitleZones.logger.warn("Wasn't able to close inventory before teleporting")
+                    val newLoc = Location(world, z.position)
 
-                    setLocationSafely(Location(location.extent, z.position))
+                    if (!setLocationSafely(newLoc))
+                        location = newLoc
                 }
             }))
         }
@@ -86,6 +87,7 @@ class BoxboySupport {
                             return@CommandExecutor CommandResult.success()
                         }
 
+                        TitleZones.logger.warn("The Zone Menu can only be opened in-game.")
                         return@CommandExecutor CommandResult.empty()
                     })
         }, "zm")

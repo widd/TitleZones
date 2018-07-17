@@ -48,7 +48,7 @@ import java.nio.file.Path
 @Plugin(id = "titlezones",
         name = "Title Zones",
         description = "A Sponge plugin that allows you to define zones that send Titles to Players who cross their borders.",
-        version = "1.0.0-SNAPSHOT",
+        version = "1.0.1",
         authors = ["widd"],
         dependencies = [Dependency(id = "boxboy", optional = true)])
 class TitleZones @Inject constructor(plugin: PluginContainer,
